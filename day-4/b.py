@@ -1,7 +1,5 @@
 from sys import argv
 from time import perf_counter
-from collections import deque
-
 
 def read_file(filename):
     with open(filename) as file:
