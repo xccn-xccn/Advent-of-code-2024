@@ -1,6 +1,5 @@
 from sys import argv
 from time import perf_counter
-from collections import deque
 
 
 def read_file(filename):
@@ -43,13 +42,13 @@ def main():
 
                 py, px = cy + dy * i, cx + dx * i
                 if py < 0 or py + 1 > len(grid) or px < 0 or px + 1 > len(grid[0]):
-                    continue
-
-                if grid[py][px] == "XMAS"[i]:
-                    if i == 3:
-                        count += 1
-                else:
                     break
+
+                if grid[py][px] != "XMAS"[i]:
+                    break
+                    
+                if i == 3:
+                    count += 1
 
     return count
 
