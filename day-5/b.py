@@ -14,27 +14,29 @@ def get_input_file():
     elif len(argv) == 2:
         return argv[1] if argv[1] != "i" else "input.txt"
 
-def valid(line, rules):
+def single(line, rules):
     seen = set()
-    for i, char in enumerate(line):
-        if f_rules.get(char, set()) & seen:
-            return i
+    for char in line:
+        if rules.get(char, set()) & seen:
+            return new_list(line, char, rules.get(char, set()) & seen)
         else:
             seen.add(char)
 
-    return True
+    return line
 
 def new_list(line, aim, to_move):
     new = []
-    move_c = []
+    move_c = list(to_move)
     for char in line:
         if char in to_move:
-            move_c.append(char)
+            continue
         elif char == aim:
-            new += move_c
             new.append(char)
+            new += move_c
         else:
             new.append(char)
+
+    return new
         
 
 
@@ -46,13 +48,18 @@ def main():
     for s, e in rules:
         f_rules[s].add(e)
         
-    print(f_rules)
     count = 0
     for line in update:
-        print(line)
 
-        if valid:
-            count += int(line[len(line)//2])
+        l = single(line, f_rules)
+        if l == line:
+            continue
+        old = []
+        while old != l:
+            old = l
+            l = single(l, f_rules)
+        
+        count += int(l[len(l) // 2])
 
     return count
 
