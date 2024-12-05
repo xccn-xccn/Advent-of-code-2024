@@ -16,45 +16,27 @@ def get_input_file():
 
 
 def main():
-    grid = read_file(get_input_file()).splitlines()
-    starts = [
-        (y, x)
-        for y, row in enumerate(grid)
-        for x, square in enumerate(row)
-        if square == "X"
-    ]
+    rules, update = read_file(get_input_file()).split('\n\n')
+    rules = [row.split('|') for row in rules.splitlines()]
+    rules = {s:e for s, e in rules}
     count = 0
+    for line in update.splitlines():
+        seen = set()
+        valid = True
+        line = line.split(',')
+        for char in line:
+            if rules.get(char, -1) in seen:
+                valid = False
+                break
+            else:
+                seen.add(char)
 
-    for start in starts:
-        cy, cx = start
-        for dy, dx in (
-            (1, 0),
-            (1, 1),
-            (0, 1),
-            (-1, 1),
-            (-1, 0),
-            (-1, -1),
-            (0, -1),
-            (1, -1),
-        ):
+        if valid:
+            count += line[(len(line)-1)/2]
 
-            for i in range(1, 4):
-
-                py, px = cy + dy * i, cx + dx * i
-                if py < 0 or py + 1 > len(grid) or px < 0 or px + 1 > len(grid[0]):
-                    break
-
-                if grid[py][px] != "XMAS"[i]:
-                    break
-                    
-                if i == 3:
-                    count += 1
-
-    return count
-
+    print(rules)
 
 if __name__ == "__main__":
     start = perf_counter()
-
     print(main())
-    print(f"Time taken: {(perf_counter() - start) *1000} miliseconds")
+    print(f'Time taken: {(perf_counter() - start) *1000} miliseconds')
