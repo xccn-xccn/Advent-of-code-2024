@@ -1,6 +1,7 @@
 from sys import argv
 from time import perf_counter
 
+
 def read_file(filename):
     with open(filename) as file:
         text = file.read()
@@ -16,8 +17,6 @@ def get_input_file():
 
 def main():
     text = list(map(int, list(read_file(get_input_file()))))
-    print(text)
-    print(len(text))
     disk = []
     pos = [0, 1]
     back = [len(text) - 1, 1]
@@ -34,25 +33,26 @@ def main():
                 back[1] += 1
 
         if pos[1] == n:
-            pos[0] += 1
             pos[1] = 1
+            pos[0] += 1
+            while pos[0] < len(text) and text[pos[0]] == 0:
+                pos[0] += 1
         else:
             pos[1] += 1
 
-        # print(pos, back)
-        if pos[0] > back[0] or (pos[0] == back[0] and pos[1] > (text[pos[0]] - back[1] + 1)):
+        if pos[0] > back[0] or (
+            pos[0] == back[0] and pos[1] > (text[pos[0]] - back[1] + 1)
+        ):
             break
 
     check_sum = 0
-    print(disk)
     for i, d in enumerate(disk):
         check_sum += d * i
+    return check_sum
 
 
-
-    return check_sum 
 if __name__ == "__main__":
     start = perf_counter()
 
     print(main())
-    print(f'Time taken: {(perf_counter() - start) *1000} miliseconds')
+    print(f"Time taken: {(perf_counter() - start) *1000} miliseconds")
