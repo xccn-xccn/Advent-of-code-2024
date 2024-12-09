@@ -15,30 +15,42 @@ def get_input_file():
 
 
 def main():
-    text = list(map(int, list(read_file(get_input_file())))
+    text = list(map(int, list(read_file(get_input_file()))))
+    print(text)
     print(len(text))
-    front = (0, 1)
-    back  = (0, text[-1])
-    text_i = 0
-    real_i = 0
-    check_sum = 0
-    while (front[0] + back[0], front[1] + back[1]) != (len(text) - 1, text[-1]):
-        if pos % 2:
-            checksum += real_i * front[0]
-            if front[1] == text[text_i]:
-                front[0] += 1
-                text_i += 1
-            else:
-                front[1] += 1
+    disk = []
+    pos = [0, 1]
+    back = [len(text) - 1, 1]
+    while pos[0] < len(text):
+        n = text[pos[0]]
+        if (pos[0] + 1) % 2:
+            disk.append(pos[0] // 2)
         else:
-            checksum += real_i * ((len(text) // 2 + 1) - back[0])
-            if back[1] == 0:
-                back[0] += 1
-                text_i += 1
+            disk.append(back[0] // 2)
+            if back[1] == text[back[0]]:
+                back[0] -= 2
+                back[1] = 1
             else:
-                back[1] -= 1
+                back[1] += 1
 
-        real_i += 1
+        if pos[1] == n:
+            pos[0] += 1
+            pos[1] = 1
+        else:
+            pos[1] += 1
+
+        # print(pos, back)
+        if pos[0] > back[0] or (pos[0] == back[0] and pos[1] > (text[pos[0]] - back[1] + 1)):
+            break
+
+    check_sum = 0
+    print(disk)
+    for i, d in enumerate(disk):
+        check_sum += d * i
+
+
+
+    return check_sum 
 if __name__ == "__main__":
     start = perf_counter()
 
