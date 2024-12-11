@@ -35,9 +35,7 @@ def get_stones(stone, rem):
         return get_stones(1, rem - 1)
     elif len(str_s) % 2 == 0:
         return get_stones(int(str_s[: len(str_s) // 2]), rem - 1) + get_stones(
-            int(str_s[len(str_s) // 2 :]), rem - 1
-        )
-
+            int(str_s[len(str_s) // 2:]), rem - 1)
     else:
         return get_stones(stone * 2024, rem - 1)
 
