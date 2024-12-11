@@ -1,6 +1,7 @@
 from sys import argv
 from time import perf_counter
 
+
 def read_file(filename):
     with open(filename) as file:
         text = file.read()
@@ -16,15 +17,15 @@ def get_input_file():
 
 def main():
     stones = [int(x) for x in read_file(get_input_file()).split()]
-    for r in range(25):
+    for _ in range(25):
         new = []
         for s in stones:
             str_s = str(s)
             if s == 0:
                 new.append(1)
             elif len(str_s) % 2 == 0:
-                new.append(int(str_s[:len(str_s)//2]))
-                new.append(int(str_s[len(str_s)//2:]))
+                new.append(int(str_s[: len(str_s) // 2]))
+                new.append(int(str_s[len(str_s) // 2 :]))
             else:
                 new.append(s * 2024)
 
@@ -37,4 +38,4 @@ if __name__ == "__main__":
     start = perf_counter()
 
     print(main())
-    print(f'Time taken: {(perf_counter() - start) *1000} miliseconds')
+    print(f"Time taken: {(perf_counter() - start) *1000} miliseconds")
