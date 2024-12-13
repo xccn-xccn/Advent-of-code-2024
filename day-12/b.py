@@ -42,7 +42,7 @@ def single_region(grid, seen):
 
     seen.add(pos)
     bag = [pos]
-    region = [pos]
+    region = set([(pos)])
     sides = 0
     while bag:
         cy, cx = bag.pop()
@@ -59,23 +59,30 @@ def single_region(grid, seen):
             if (py, px) in seen:
                 continue
             bag.append((py, px))
-            region.append((py, px))
+            region.add((py, px))
             seen.add((py, px))
 
-    
+    sides += get_sides(grid, region)
+    sides += get_sides(list(zip(*grid[::-1])), region)
 
-    r_list = list(zip(*grid[::-1]))
-                
-            
-def get_sides(grid, seen):
+    return sides * len(region), seen
+
+
+def get_sides(grid, region):
+    count = 0
     for y1, y2 in zip(range(-1, len(grid)), range(len(grid) + 1)):
-        for x1, x2 in zip(range(-1, len(grid[0]), range(len(grid[0])))):
-            s1, s2 = (y1, x1) in seen, (y2, x2) in seen
+        for x in range(len(grid[0])):
+            s1, s2 = (y1, x) in region, (y2, x) in region
+            s3, s4 = (y1, x - 1) in region, (y2, x - 1) in region
             if s1 ^ s2:
-                if i < 0 or (row1[i], row2[i]) != (s1, s2):
-                    sides += 1
+                if (s1, s2) != (s3, s4):
+                    count += 1
+
+    return count
+
+
 if __name__ == "__main__":
     start = perf_counter()
 
     print(main())
-    print(f"Time taken: {(perf_counter() - start) *1000} miliseconds
+    print(f"Time taken: {(perf_counter() - start) *1000} miliseconds")
