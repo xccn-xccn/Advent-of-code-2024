@@ -86,9 +86,8 @@ def single(grid, cx, cy, aim):
     return fx, fy, get_paths(fx, fy, seen, sx, sy)
 
 def get_sequence(grids, aim, layer):
-    print(layer)
-    if layer == 4:
-        return [aim]
+    if layer == 2:
+        return aim
     if layer == 0:
         cx, cy = 2, 3
         grid = grids[0]
@@ -96,31 +95,15 @@ def get_sequence(grids, aim, layer):
         cx, cy = 2, 0
         grid = grids[1]
 
-    
     sequence = [[]]
     for a in aim:
-        # print(a)
         cx, cy, n_seq = single(grid, cx, cy, a)
-        # print(a, n_seq, 'layer', layer)
-        s_seq = []
-        for n in n_seq:
-            # print('n', n, 'layer', layer)
-            s_seq.extend(get_sequence(grids, n, layer+1))
-            # print(len(s_seq), 's_seq', s_seq)
-        min_len = len(min(s_seq, key=len))
-        # print('minlen', min_len, 'layer', layer)
-        # print('before', sequence, s_seq)
-        print([len(x) for x in s_seq])
-        print(len(sequence))
-        sequence = [x + s for x in sequence for s in s_seq if len(s) == min_len] 
-        # print('after', sequence)
-        # print('sequence lengths', len(sequence), len(sequence[0]))
-        # print(s_seq)
+        s_seq = get_sequence(grids, n_seq, layer+1)
+        sequence = [x + n for x in sequence for n in s_seq] 
+        print('sequence lengths', len(sequence), len(sequence[0]))
+        print(s_seq)
 
-    # print('sequence', sequence, 'layer', layer)
-    print(len(sequence), len(sequence[0]))
     return sequence
-
 def main():
     codes = read_file(get_input_file()).splitlines()
 
@@ -140,10 +123,11 @@ def main():
 
     count = 0
     # it is possible for 2 equal routes to be difference length in the lower layers
+    seq = []
     for code in codes: 
-        sequence = get_sequence(grids, code, 0)
-        # print(sequence, len(sequence[0]), [len(x) for x in sequence])
-        count += len(sequence[0]) * int(list(re.findall('\d+', code))[0])
+        seq = get_sequence(grids, code, 0)
+
+        count += len(seq[0]) * int(list(re.findall('\d+', code))[0])
     return count
 if __name__ == "__main__":
     start = perf_counter()
