@@ -25,15 +25,16 @@ def single(n):
 
 def main():
     nums = list(map(int, read_file(get_input_file()).splitlines()))
-
     sequences = defaultdict(lambda: 0)
+
     for n in nums:
-        prices, changes, seen = [int(str(n)[-1])], [], set()
+        last, changes, seen = int(str(n)[-1]), [], set()
         for r in range(2000):
+            
             n = single(n)
             v = int(str(n)[-1])
-            changes.append(v - prices[-1])
-            prices.append(v)
+            changes.append(v - last)
+            last = v
 
             if len(changes) >= 4 and tuple(changes[-4:]) not in seen:
                 seen.add(tuple(changes[-4:]))
