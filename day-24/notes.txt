@@ -1,0 +1,26 @@
+half addder
+
+bit 1 : a xor b
+bit 2: a and b
+
+full addder
+
+half adder a and b
+
+half adder bit 1 of result with c
+or the result of the 2 second bits
+
+bit 1: (a xor b) xor c == a xor b xor c
+bit 2: (a and b) or ((a xor b) and c)
+
+to add 2 numbers
+
+half adder the least significant bits
+use the sum as value for the least signiicant bit of the result
+use the carry to perform a full adder with the next significant bits 
+
+therefore 
+
+therefore x00 xor y00 -> z00
+(x01 xor y01) xor (x00 and y00) -> z01
+(x02 xor y02) xor (x01 and y01) or ((x01 xor y01) and (x00 and y00)) -> z02

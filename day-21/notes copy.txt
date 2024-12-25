@@ -1,0 +1,9 @@
+Up and left: up before left
+
+up left A
+left, A down, left, A right, right, up A
+down left left A right right up A left A right A
+
+left up A
+down, left, left, A right, up A, right A
+left down A left A A right right up A down A left up A right A down A up A

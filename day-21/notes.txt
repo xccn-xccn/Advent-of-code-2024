@@ -1,0 +1,13 @@
+Up and left: up before left
+
+up and right: right before up
+
+down and right: down then right
+
+down and left: left then down 
+
+left, down, right, up, left
+
+the directions flipped 
+
+maybe the order is not in a loop

@@ -20,6 +20,28 @@ def get_input_file():
         return argv[1] if argv[1] != "i" else "input.txt"
 
 
+def valid_order(seq):
+    # seq = ''.join(seq).split('A')
+    order = ['^', '<', 'v', '>']
+
+    # print('seq', seq)
+    s = [k for k, v in groupby(seq)]
+    # print('s', s)
+    if len(s) == 2:
+        c1, c2 = s
+        
+        # print(order.index(c1))
+        if order[(order.index(c1) + 1) % 4] != c2:
+            return False
+        
+    if len(s) > 2:
+        print(seq, s)
+        raise Exception
+        
+    # print('valid')
+    return True
+
+
 def get_paths(cx, cy, seen, sx, sy):
     bag = deque([(cx, cy, [], set([(cx, cy)]))])
     valid = []
@@ -42,10 +64,21 @@ def get_paths(cx, cy, seen, sx, sy):
                 valid.append(pseq)
 
     if valid:
+        # print(valid, [len(x) for x in valid])
+        min_len = len(min(valid, key=len))
+        valid = [x for x in valid if len(x) == min_len]
         best = min([len(list(groupby(v))) for v in valid])
         valid = [v for v in valid if len(list(groupby(v))) == best]
+        # print('valid', valid)
+        if len(valid) > 1:
+            valid = [v for v in valid if valid_order(v)]
+        # print('valid is', valid)
 
-    return [x[::-1] + ['A'] for x in valid] if valid else [['A']]
+        if len(valid) == 0:
+            raise Exception
+
+    # return [x[::-1] + ['A'] for x in valid] if valid else [['A']]
+    return valid[0][::-1] + ['A'] if valid else ['A']
 
 @cache
 def single(grid, cx, cy, aim):
@@ -59,7 +92,8 @@ def single(grid, cx, cy, aim):
         
         cx, cy, ct = bag.popleft()
         if grid[cy][cx] == aim:
-            fx, fy = cx, cy
+            # no need TODO
+            fx, fy = cx, cy 
             if ct < best:
                 best = ct
         if ct > best:
@@ -79,16 +113,18 @@ def single(grid, cx, cy, aim):
             seen[(px, py)].append((cx, cy, conv[(dx, dy)]))
             
 
-    if not (fx, fy):
-        print(fx, fy)
+    if not(fx, fy):
+        print(grid, aim, sx, sy)
         raise Exception
     
     return fx, fy, get_paths(fx, fy, seen, sx, sy)
 
 def get_sequence(grids, aim, layer):
-    print(layer)
-    if layer == 4:
-        return [aim]
+    # print(layer)
+    # if layer >= 10:
+    #     print(layer)
+    if layer == 3:
+        return aim
     if layer == 0:
         cx, cy = 2, 3
         grid = grids[0]
@@ -97,28 +133,29 @@ def get_sequence(grids, aim, layer):
         grid = grids[1]
 
     
-    sequence = [[]]
+    sequence = []
     for a in aim:
         # print(a)
         cx, cy, n_seq = single(grid, cx, cy, a)
         # print(a, n_seq, 'layer', layer)
-        s_seq = []
-        for n in n_seq:
-            # print('n', n, 'layer', layer)
-            s_seq.extend(get_sequence(grids, n, layer+1))
+        # print(len(n_seq))
+        # print(n_seq)
+        s_seq = get_sequence(grids, n_seq, layer+1)
             # print(len(s_seq), 's_seq', s_seq)
-        min_len = len(min(s_seq, key=len))
         # print('minlen', min_len, 'layer', layer)
         # print('before', sequence, s_seq)
-        print([len(x) for x in s_seq])
-        print(len(sequence))
-        sequence = [x + s for x in sequence for s in s_seq if len(s) == min_len] 
+        # print([len(x) for x in s_seq])
+        # print(len(sequence))
+        # print(s_seq)
+        sequence += s_seq
+        # print(sequence)
         # print('after', sequence)
         # print('sequence lengths', len(sequence), len(sequence[0]))
         # print(s_seq)
 
     # print('sequence', sequence, 'layer', layer)
-    print(len(sequence), len(sequence[0]))
+    if layer <= 1:
+        print(len(sequence), len(sequence))
     return sequence
 
 def main():
@@ -143,7 +180,8 @@ def main():
     for code in codes: 
         sequence = get_sequence(grids, code, 0)
         # print(sequence, len(sequence[0]), [len(x) for x in sequence])
-        count += len(sequence[0]) * int(list(re.findall('\d+', code))[0])
+        count += len(sequence) * int(list(re.findall('\d+', code))[0])
+        print(count)
     return count
 if __name__ == "__main__":
     start = perf_counter()

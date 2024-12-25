@@ -115,6 +115,7 @@ def main():
             seq = []
             for s in o_seq:
                 seq.extend(get_sequence(second_grid, s))
+        print(len(min(seq, key=len)),)
         count += len(min(seq, key=len)) * int(list(re.findall("\d+", code))[0])
     return count
 
