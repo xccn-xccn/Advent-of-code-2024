@@ -5,8 +5,7 @@ from itertools import groupby
 from functools import cache
 import re
 
-# issue is when there are 2 options the number of sequences doubles which of course gets very big very quickly
-# make best function that takes cx, cy, aim and returns the best sequence 25 steps in
+
 def read_file(filename):
     with open(filename) as file:
         text = file.read()
@@ -21,24 +20,19 @@ def get_input_file():
 
 
 def valid_order(seq):
-    # seq = ''.join(seq).split('A')
-    order = ['^', '<', 'v', '>']
+    order = {"<": "^v", "^": ">", ">": ".", "v": ">"}
 
-    # print('seq', seq)
     s = [k for k, v in groupby(seq)]
-    # print('s', s)
     if len(s) == 2:
         c1, c2 = s
-        
-        # print(order.index(c1))
-        if order[(order.index(c1) + 1) % 4] != c2:
+
+        if c2 not in order[c1]:
             return False
-        
+
     if len(s) > 2:
         print(seq, s)
         raise Exception
-        
-    # print('valid')
+
     return True
 
 
@@ -59,41 +53,33 @@ def get_paths(cx, cy, seen, sx, sy):
             pseq.append(nm)
             bag.append((nx, ny, pseq, pseen))
 
-            
             if (nx, ny) == (sx, sy):
                 valid.append(pseq)
 
     if valid:
-        # print(valid, [len(x) for x in valid])
-        min_len = len(min(valid, key=len))
-        valid = [x for x in valid if len(x) == min_len]
+
         best = min([len(list(groupby(v))) for v in valid])
         valid = [v for v in valid if len(list(groupby(v))) == best]
-        # print('valid', valid)
+
         if len(valid) > 1:
-            valid = [v for v in valid if valid_order(v)]
-        # print('valid is', valid)
+            valid = [v for v in valid if valid_order(v[::-1])]
 
-        if len(valid) == 0:
-            raise Exception
+    return valid[0][::-1] + ["A"] if valid else ["A"]
 
-    # return [x[::-1] + ['A'] for x in valid] if valid else [['A']]
-    return valid[0][::-1] + ['A'] if valid else ['A']
 
 @cache
 def single(grid, cx, cy, aim):
     sx, sy = cx, cy
     bag = deque([[cx, cy, 0]])
     seen = defaultdict(list)
-    conv = {(1, 0): '>', (0, 1): 'v', (-1, 0): '<', (0, -1): '^'}
-    best = float('inf')
+    conv = {(1, 0): ">", (0, 1): "v", (-1, 0): "<", (0, -1): "^"}
+    best = float("inf")
 
     while bag:
-        
+
         cx, cy, ct = bag.popleft()
         if grid[cy][cx] == aim:
-            # no need TODO
-            fx, fy = cx, cy 
+            fx, fy = cx, cy
             if ct < best:
                 best = ct
         if ct > best:
@@ -101,29 +87,29 @@ def single(grid, cx, cy, aim):
 
         for dx, dy in ((1, 0), (0, 1), (-1, 0), (0, -1)):
             px, py = cx + dx, cy + dy
-            
-            if px < 0 or py < 0 or px >= len(grid[0]) or py >= len(grid) or (cx, cy) in [x[:2] for x in seen[px, py]]:
+
+            if (
+                px < 0
+                or py < 0
+                or px >= len(grid[0])
+                or py >= len(grid)
+                or (cx, cy) in [x[:2] for x in seen[px, py]]
+            ):
                 continue
             psquare = grid[py][px]
-            if psquare == '.':
+            if psquare == ".":
                 continue
-            
+
             if seen[(px, py)] == []:
                 bag.append([px, py, ct + 1])
             seen[(px, py)].append((cx, cy, conv[(dx, dy)]))
-            
 
-    if not(fx, fy):
-        print(grid, aim, sx, sy)
-        raise Exception
-    
     return fx, fy, get_paths(fx, fy, seen, sx, sy)
 
-def get_sequence(grids, aim, layer):
-    # print(layer)
-    # if layer >= 10:
-    #     print(layer)
-    if layer == 3:
+
+@cache
+def get_sequence(aim, layer, extra=0, start=None):
+    if layer == 13 + extra:
         return aim
     if layer == 0:
         cx, cy = 2, 3
@@ -132,59 +118,47 @@ def get_sequence(grids, aim, layer):
         cx, cy = 2, 0
         grid = grids[1]
 
-    
+    if start:
+        for y, row in enumerate(grid):
+            for x, square in enumerate(row):
+                if square == start:
+                    cx, cy = x, y
+                    break
+
     sequence = []
     for a in aim:
-        # print(a)
         cx, cy, n_seq = single(grid, cx, cy, a)
-        # print(a, n_seq, 'layer', layer)
-        # print(len(n_seq))
-        # print(n_seq)
-        s_seq = get_sequence(grids, n_seq, layer+1)
-            # print(len(s_seq), 's_seq', s_seq)
-        # print('minlen', min_len, 'layer', layer)
-        # print('before', sequence, s_seq)
-        # print([len(x) for x in s_seq])
-        # print(len(sequence))
-        # print(s_seq)
+        s_seq = get_sequence("".join(n_seq), layer + 1, extra)
         sequence += s_seq
-        # print(sequence)
-        # print('after', sequence)
-        # print('sequence lengths', len(sequence), len(sequence[0]))
-        # print(s_seq)
 
-    # print('sequence', sequence, 'layer', layer)
-    if layer <= 1:
-        print(len(sequence), len(sequence))
     return sequence
 
+
 def main():
+    global grids
+
     codes = read_file(get_input_file()).splitlines()
 
-    first_grid = (
-        ('7', '8', '9'),
-        ('4', '5', '6'),
-        ('1', '2', '3'),
-        ('.', '0', 'A')
-    )
-
-    second_grid = (
-        ('.', '^', 'A'),
-        ('<', 'v', '>')
-    )
+    first_grid = (("7", "8", "9"), ("4", "5", "6"), ("1", "2", "3"), (".", "0", "A"))
+    second_grid = ((".", "^", "A"), ("<", "v", ">"))
 
     grids = (first_grid, second_grid)
 
     count = 0
-    # it is possible for 2 equal routes to be difference length in the lower layers
-    for code in codes: 
-        sequence = get_sequence(grids, code, 0)
-        # print(sequence, len(sequence[0]), [len(x) for x in sequence])
-        count += len(sequence) * int(list(re.findall('\d+', code))[0])
-        print(count)
+    for code in codes:
+
+        sequence = get_sequence(code, 0, extra=0)
+        s_count = len(get_sequence(sequence[0], 1, extra=1))
+
+        for s1, s2 in zip(sequence, sequence[1:]):
+            s_count += len(get_sequence(s2, 1, extra=1, start=s1))
+
+        count += s_count * int(list(re.findall("\d+", code))[0])
+
     return count
+
+
 if __name__ == "__main__":
     start = perf_counter()
-    print('thestart')
     print(main())
-    print(f'Time taken: {(perf_counter() - start) *1000} miliseconds')
+    print(f"Time taken: {(perf_counter() - start) *1000} miliseconds")
