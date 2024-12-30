@@ -38,9 +38,6 @@ for zn
 
 (xn xor yn) xor carry 
 
-
-make recurssive function
-
 set xn xor yn = rn
 verify rn xor c(n-1) -> zn
 set an = xn and yn
