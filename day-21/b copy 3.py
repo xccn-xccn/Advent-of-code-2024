@@ -21,32 +21,27 @@ def get_input_file():
 
 
 def valid_order(seq):
-    # seq = ''.join(seq).split('A')
-    order = ['^', '<', 'v', '>']
-    # order = ['^', '>', 'v', '<']
+    order = {'<':'^v', '^':'>', '>': '.', 'v':'>'}
 
     # print('seq', seq)
     s = [k for k, v in groupby(seq)]
     # print('s', s)
     if len(s) == 2:
         c1, c2 = s
+        
         # print(order.index(c1))
-        if order[(order.index(c1) + 1) % 4] != c2:
-            print(seq)
+        if c2 not in order[c1]:
             return False
         
     if len(s) > 2:
-        # print(seq)
         print(seq, s)
         raise Exception
-        # return False
         
     # print('valid')
     return True
 
 
 def get_paths(cx, cy, seen, sx, sy):
-    print(cx, cy)
     bag = deque([(cx, cy, [], set([(cx, cy)]))])
     valid = []
     while bag:
@@ -69,22 +64,20 @@ def get_paths(cx, cy, seen, sx, sy):
 
     if valid:
         # print(valid, [len(x) for x in valid])
-        
+        min_len = len(min(valid, key=len))
+        valid = [x for x in valid if len(x) == min_len]
         best = min([len(list(groupby(v))) for v in valid])
         valid = [v for v in valid if len(list(groupby(v))) == best]
-        # min_len = len(min(valid, key=len))
-        # valid = [x for x in valid if len(x) == min_len]
-        # print('valid', valid, sx, sy)
+        # print('valid', valid)
         if len(valid) > 1:
-            # print('valid', valid)
-            print([(v, v[::-1]) for v in valid])
             valid = [v for v in valid if valid_order(v[::-1])]
         # print('valid is', valid)
 
         if len(valid) == 0:
             raise Exception
 
-    return [x[::-1] + ['A'] for x in valid] if valid else [['A']]
+    # return [x[::-1] + ['A'] for x in valid] if valid else [['A']]
+    return valid[0][::-1] + ['A'] if valid else ['A']
 
 @cache
 def single(grid, cx, cy, aim):
@@ -94,7 +87,6 @@ def single(grid, cx, cy, aim):
     conv = {(1, 0): '>', (0, 1): 'v', (-1, 0): '<', (0, -1): '^'}
     best = float('inf')
 
-    print('aim', aim)
     while bag:
         
         cx, cy, ct = bag.popleft()
@@ -126,12 +118,14 @@ def single(grid, cx, cy, aim):
     
     return fx, fy, get_paths(fx, fy, seen, sx, sy)
 
-def get_sequence(grids, aim, layer):
+@cache
+def get_sequence(grids, aim, layer, extra=0):
     # print(layer)
     # if layer >= 10:
     #     print(layer)
-    if layer == 3:
-        return [aim]
+    # print(extra)
+    if layer == 16 + extra:
+        return aim
     if layer == 0:
         cx, cy = 2, 3
         grid = grids[0]
@@ -140,30 +134,29 @@ def get_sequence(grids, aim, layer):
         grid = grids[1]
 
     
-    sequence = [[]]
+    sequence = []
     for a in aim:
         # print(a)
         cx, cy, n_seq = single(grid, cx, cy, a)
         # print(a, n_seq, 'layer', layer)
-        s_seq = []
-        for n in n_seq:
-            # print('n', n, 'layer', layer)
-            s_seq.extend(get_sequence(grids, n, layer+1))
+        # print(len(n_seq))
+        # print(n_seq)
+        s_seq = get_sequence(grids, ''.join(n_seq), layer+1, extra)
             # print(len(s_seq), 's_seq', s_seq)
-        min_len = len(min(s_seq, key=len))
         # print('minlen', min_len, 'layer', layer)
         # print('before', sequence, s_seq)
         # print([len(x) for x in s_seq])
         # print(len(sequence))
-        # print('s_seq', len(s_seq))
-        sequence = [x + s for x in sequence for s in s_seq if len(s) == min_len] 
+        # print(s_seq)
+        sequence += s_seq
+        # print(sequence)
         # print('after', sequence)
         # print('sequence lengths', len(sequence), len(sequence[0]))
         # print(s_seq)
 
     # print('sequence', sequence, 'layer', layer)
     if layer <= -1:
-        print(len(sequence), len(sequence[0]))
+        print(len(sequence), len(sequence))
     return sequence
 
 def main():
@@ -183,19 +176,27 @@ def main():
 
     grids = (first_grid, second_grid)
 
-    # s = get_sequence(grids, ['0'], 0)
-    # print(s, [len(x) for x in s])
-    # return 
+    d_lengths = {}
+    for d in '^v<>A':
+        d_lengths[d] = get_sequence(grids, d, 1, extra=-5)
+
+    # print(d_lengths)
     count = 0
     for code in codes: 
         sequence = get_sequence(grids, code, 0)
         # print(sequence, len(sequence[0]), [len(x) for x in sequence])
-        print(len(min(sequence, key=len)))
-        count += len(min(sequence, key=len)) * int(list(re.findall('\d+', code))[0])
-        # print(count)
+        s_count = sum([len(d_lengths[x]) for x in sequence])
+        count += s_count * int(list(re.findall('\d+', code))[0])
+        # count += len(sequence) * int(list(re.findall('\d+', code))[0])
+        # print(len(sequence), code)
+
+    print(len(str(count)))
     return count
 if __name__ == "__main__":
     start = perf_counter()
     print('thestart')
     print(main())
     print(f'Time taken: {(perf_counter() - start) *1000} miliseconds')
+
+# 423973575795644 (15d) too high 65825838402202 (14d) too low?
+# 255659548467371 15d too low

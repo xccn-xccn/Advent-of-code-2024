@@ -22,7 +22,15 @@ def get_input_file():
 
 def valid_order(seq):
     # seq = ''.join(seq).split('A')
-    order = ['^', '<', 'v', '>']
+    # order = ['<','v', '>', '^']
+    # order = ['<','^', '>', 'v']
+    # order = {'<':'^', '^':'>', '>': 'v', 'v':'<'}
+    order = {'<':'^', '^':'.', '>': '^', 'v':'<'}
+    # order = {'<':'^v', '^':'>', '>': 'v', 'v':'<'}
+    order = {'<':'^', '^':'.', '>': '^', 'v':'<>'}
+    order = {'<':'^', '^':'.', '>': '^', 'v':'<>'}
+    order = {'<':'^v', '^':'.', '>': '^', 'v':'>'}
+    order = {'<':'^v', '^':'>', '>': '.', 'v':'>'}
 
     # print('seq', seq)
     s = [k for k, v in groupby(seq)]
@@ -31,7 +39,7 @@ def valid_order(seq):
         c1, c2 = s
         
         # print(order.index(c1))
-        if order[(order.index(c1) + 1) % 4] != c2:
+        if c2 not in order[c1]:
             return False
         
     if len(s) > 2:
@@ -71,11 +79,11 @@ def get_paths(cx, cy, seen, sx, sy):
         valid = [v for v in valid if len(list(groupby(v))) == best]
         # print('valid', valid)
         if len(valid) > 1:
-            valid = [v for v in valid if valid_order(v)]
+            valid = [v for v in valid if valid_order(v[::-1])]
         # print('valid is', valid)
 
-        if len(valid) == 0:
-            raise Exception
+        if len(valid) != 1:
+            raise Exception(valid, len(valid))
 
     # return [x[::-1] + ['A'] for x in valid] if valid else [['A']]
     return valid[0][::-1] + ['A'] if valid else ['A']
@@ -125,10 +133,10 @@ def get_sequence(grids, aim, layer, extra=0):
     # if layer >= 10:
     #     print(layer)
     # print(extra)
-    if layer == 3 + extra:
+    if layer == 6 + extra:
         return aim
     if layer == 0:
-        cx, cy = 2, 3
+        cx, cy = 1, 3
         grid = grids[0]
     else:
         cx, cy = 2, 0
@@ -170,6 +178,13 @@ def main():
         ('.', '0', 'A')
     )
 
+    first_grid = (
+        ('7', '8', '9'),
+        ('4', '5', '6'),
+        ('1', '2', '3'),
+        ('.', '0', 'A')
+    )
+
     second_grid = (
         ('.', '^', 'A'),
         ('<', 'v', '>')
@@ -177,21 +192,10 @@ def main():
 
     grids = (first_grid, second_grid)
 
-    d_lengths = {}
-    for d in '^v<>A':
-        d_lengths[d] = get_sequence(grids, d, 1, extra=2)
-
     # print(d_lengths)
-    count = 0
-    for code in codes: 
-        sequence = get_sequence(grids, code, 0)
-        # print(sequence, len(sequence[0]), [len(x) for x in sequence])
-        # s_count = sum([len(d_lengths[x]) for x in sequence])
-        # count += s_count * int(list(re.findall('\d+', code))[0])
-        count += len(sequence) * int(list(re.findall('\d+', code))[0])
-
-    print(len(str(count)))
-    return count
+    sequence = get_sequence(grids, '3', 0)
+    print(sequence)
+    print(len(sequence))
 if __name__ == "__main__":
     start = perf_counter()
     print('thestart')

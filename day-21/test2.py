@@ -18,6 +18,47 @@ def get_input_file():
     elif len(argv) == 2:
         return argv[1] if argv[1] != "i" else "input.txt"
 
+def valid_order(seq):
+    # seq = ''.join(seq).split('A')
+    order = ['^', '<', 'v', '>']
+
+    # print('seq', seq)
+    s = [k for k, v in groupby(seq)]
+    # print('s', s)
+    if len(s) == 2:
+        c1, c2 = s
+        
+        # print(order.index(c1))
+        if order[(order.index(c1) + 1) % 4] != c2:
+            return False
+        
+    if len(s) > 2:
+        print(seq, s)
+        raise Exception
+        
+    # print('valid')
+    return True
+
+def valid_order(seq):
+    order = {'<':'^v', '^':'>', '>': '.', 'v':'>'}
+
+    # print('seq', seq)
+    s = [k for k, v in groupby(seq)]
+    # print('s', s)
+    if len(s) == 2:
+        c1, c2 = s
+        
+        # print(order.index(c1))
+        if c2 not in order[c1]:
+            return False
+        
+    if len(s) > 2:
+        print(seq, s)
+        raise Exception
+        
+    # print('valid')
+    return True
+
 
 def get_paths(cx, cy, seen, sx, sy):
     bag = deque([(cx, cy, [], set([(cx, cy)]))])
@@ -42,6 +83,8 @@ def get_paths(cx, cy, seen, sx, sy):
     if valid:
         best = min([len(list(groupby(v))) for v in valid])
         valid = [v for v in valid if len(list(groupby(v))) == best]
+        if len(valid) > 1:
+            valid = [v for v in valid if valid_order(v[::-1])]
 
     return [x[::-1] + ["A"] for x in valid] if valid else [["A"]]
 
@@ -115,13 +158,12 @@ def main():
             seq = []
             for s in o_seq:
                 seq.extend(get_sequence(second_grid, s))
-        print(len(min(seq, key=len)),)
+        print(len(min(seq, key=len)), code)
         count += len(min(seq, key=len)) * int(list(re.findall("\d+", code))[0])
     return count
 
 
 if __name__ == "__main__":
     start = perf_counter()
-    print("thestart")
     print(main())
     print(f"Time taken: {(perf_counter() - start) *1000} miliseconds")

@@ -11,3 +11,13 @@ left, down, right, up, left
 the directions flipped 
 
 maybe the order is not in a loop
+
+order = ['^', '>', 'v', '<']
+
+left before up
+
+up before right
+
+down before right
+
+left before down
