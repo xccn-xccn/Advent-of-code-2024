@@ -21,6 +21,39 @@ use the carry to perform a full adder with the next significant bits
 
 therefore 
 
-therefore x00 xor y00 -> z00
+x00 xor y00 -> z00
+carry : x00 and y00
+
 (x01 xor y01) xor (x00 and y00) -> z01
-(x02 xor y02) xor (x01 and y01) or ((x01 xor y01) and (x00 and y00)) -> z02
+(x01 xor y01) xor carry  -> z01
+carry: (x01 and y01) or ((x01 xor y01) and carry)
+
+(x02 xor y02) xor [(x01 and y01) or {(x01 xor y01) and (x00 and y00)} ] -> z02
+(x02 xor y02) xor carry -> z02
+carry: (x02 and y02) or ((x02 xor y02) and carry)
+
+(x03 xor y03) xor ((  x02 and y02) or ((x02 xor y02) and [(x01 and y01) or ((x01 xor y01) and (x00 and y00))]  )) -> z03
+
+for zn
+
+(xn xor yn) xor carry 
+
+
+make recurssive function
+
+set xn xor yn = rn
+verify rn xor c(n-1) -> zn
+set an = xn and yn
+set pn = rn and c(n-1) (no need to check because already checked)
+verify and set cn = an or pn
+
+switched {'z17', 'z10', 'jcb', 'z32', 'jms'} hdj
+switched ['jcb', 'jms', 'z10', 'z17', 'z32']
+switched ['jcb', 'jms', 'z10', 'z17', 'z32', 'z39']
+
+finals?
+switched ['bnv', 'jcb', 'jms', 'mbv', 'z10', 'z17', 'z32', 'z39']
+switched ['bnv', 'jcb', 'mbv', 'ndw', 'z10', 'z32', 'z39']
+switched ['jcb', 'ndw', 'z10', 'z32', 'z39']
+switched ['grm', 'jcb', 'ndw', 'twr', 'z10', 'z32', 'z39']
+switched ['grm', 'ggn', 'jcb', 'ndw', 'twr', 'z10', 'z32', 'z39']

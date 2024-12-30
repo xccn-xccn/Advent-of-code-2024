@@ -2,6 +2,7 @@ from sys import argv
 from time import perf_counter
 import re
 
+
 def read_file(filename):
     with open(filename) as file:
         text = file.read()
@@ -16,21 +17,19 @@ def get_input_file():
 
 
 def calc(n1, n2, op):
-    if op == 'AND':
+    if op == "AND":
         return n1 and n2
     elif op == "OR":
         return n1 or n2
     else:
         return n1 ^ n2
-    
-def main():
-    wires, gates = read_file(get_input_file()).split('\n\n')
-    # known = [(k, v) for line in wires.splitlines() for k, v in (line.split(':'))]
-    known = {line.split(':')[0]: int(line.split(':')[1]) for line in wires.splitlines()}
-    print(known)
 
-    # print(known)
-    gates = [re.findall('[a-zA-Z0-9]+', x) for x in gates.splitlines()]
+
+def main():
+    wires, gates = read_file(get_input_file()).split("\n\n")
+    known = {line.split(":")[0]: int(line.split(":")[1]) for line in wires.splitlines()}
+
+    gates = [re.findall("[a-zA-Z0-9]+", x) for x in gates.splitlines()]
     cont = True
     while cont:
         cont = False
@@ -42,15 +41,12 @@ def main():
             known[w3] = calc(known[w1], known[w2], op)
             cont = True
 
-    valid = [(k, v) for k, v in known.items() if k[0] == 'z']
+    valid = [(k, v) for k, v in known.items() if k[0] == "z"]
     valid = sorted(valid, key=lambda x: x[0], reverse=True)
-    print(valid)
-    return int(''.join(str(x[1]) for x in valid), 2)
-
-    # print(gates)
+    return int("".join(str(x[1]) for x in valid), 2)
 
 
 if __name__ == "__main__":
     start = perf_counter()
     print(main())
-    print(f'Time taken: {(perf_counter() - start) *1000} miliseconds')
+    print(f"Time taken: {(perf_counter() - start) *1000} miliseconds")
